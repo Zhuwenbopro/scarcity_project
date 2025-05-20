@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>任务管理极简UI</title>
+    <meta name="viewport" content="width=1024">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Helvetica', Arial, sans-serif;
+            background: #fafbfc;
+            color: #151515;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #eee;
+            padding: 38px 0 0 0;
+            box-sizing: border-box;
+            min-width: 170px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            padding: 13px 36px;
+            cursor: pointer;
+            font-size: 1.05em;
+            color: #232323;
+            border-left: 3px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .sidebar li.active, .sidebar li:hover {
+            background: #f3f3f3;
+            border-left: 3px solid #121212;
+            color: #111;
+        }
+
+        .main {
+            flex: 1;
+            padding: 48px 44px 0 44px;
+            position: relative;
+            background: #fafbfc;
+        }
+
+        .headline {
+            font-size: 2em;
+            margin: 0 0 14px 0;
+            font-weight: 600;
+        }
+
+        .subtle-bar {
+            height: 7px;
+            background: #ececec;
+            border-radius: 5px;
+            margin: 0 0 18px 0;
+            width: 230px;
+        }
+
+        .section-title {
+            margin: 32px 0 16px 0;
+            font-size: 1.1em;
+            font-weight: 500;
+            letter-spacing: .05em;
+        }
+
+        table {
+            border-collapse: collapse;
+            background: #fff;
+            width: 99%;
+            min-width: 650px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        th, td {
+            padding: 9px 9px;
+            border-bottom: 1px solid #efefef;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        th {
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        tag {
+            display: inline-block;
+            background: #ffd497;
+            color: #00796b;
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin-right: 4px;
+            font-size: 0.9em;
+        }
+
+        .priority-urgent {
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .priority-important {
+            color: #ed6c02;
+            font-weight: 500;
+        }
+
+        .energy-high {
+            color: #00897b;
+        }
+
+        .energy-medium {
+            color: #ffa000;
+        }
+
+        .energy-low {
+            color: #666;
+        }
+
+        .focus-timer {
+            position: absolute;
+            right: 40px;
+            top: 54px;
+            width: 260px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(10, 10, 10, 0.06);
+            padding: 23px 25px 23px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            z-index: 3;
+        }
+
+        .focus-timer .title {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 7px;
+            letter-spacing: .03em;
+        }
+
+        .focus-timer .timer {
+            font-size: 2.2em;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .focus-timer .meta {
+            font-size: 0.96em;
+            color: #636363;
+            margin-bottom: 9px;
+        }
+
+        .focus-timer .btn-group {
+            margin-top: 8px;
+            display: flex;
+            gap: 7px;
+            width: 100%;
+        }
+
+        .focus-timer button {
+            font-size: 0.97em;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 9px;
+            background: #f5f5f5;
+            color: #222;
+            cursor: pointer;
+            transition: background .17s;
+        }
+
+        .focus-timer button.primary {
+            background: #121212;
+            color: #fff;
+        }
+
+        .focus-timer button:hover {
+            background: #ebebeb;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+
+            .main {
+                padding: 22px 6vw 0 6vw;
+            }
+
+            .focus-timer {
+                position: static;
+                width: 100%;
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 侧边栏 -->
+    <nav class="sidebar">
+        <ul>
+            <li class="active">Today's Tasks</li>
+            <li>Goal Management</li>
+            <li>Task List</li>
+            <li>Work Log</li>
+            <li>Energy Log</li>
+            <li>Settings</li>
+        </ul>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main">
+        <div class="headline" id="main-date"></div>
+        <div style="margin-bottom:10px;color:#757575;font-size:1em;">可用工作时常</div>
+        <div class="subtle-bar" style="width:220px;"></div>
+        <div style="margin-top:12px; margin-bottom:8px; color:#757575; font-size:1em;">Energy</div>
+        <div class="subtle-bar" style="width:140px;"></div>
+
+        <div class="section-title">Today's To-Do List</div>
+        <table>
+            <thead>
+            <tr>
+                <th>任务</th>
+                <th>优先级</th>
+                <th>预估耗时</th>
+                <th>能耗</th>
+                <th>标签</th>
+                <th>来源</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="job-list">
+            <!-- JS填充 -->
+            </tbody>
+        </table>
+        <hr/>
+        <div class="section-title">Tasks List</div>
+        <table>
+            <thead>
+            <tr>
+                <th>任务</th>
+                <th>优先级</th>
+                <th>起止时间</th>
+                <th>预估（已用）</th>
+                <th>标签</th>
+                <th>能耗</th>
+                <th>目标</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="task-list">
+            <!-- JS填充 -->
+            </tbody>
+        </table>
+        <!-- Focus Timer 浮动卡片 -->
+        <div class="focus-timer" id="focus-timer">
+            <div class="title" id="focus-title"></div>
+            <div class="timer" id="focus-countdown">00:00</div>
+            <div class="meta" id="focus-energy"></div>
+            <div class="meta" id="focus-bandwidth"></div>
+            <div class="btn-group">
+                <button id="end-btn" class="">开始</button>
+                <button id="stop-btn" class="primary">结束</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // 示例数据
+    let todayTasksList = {};
+
+    // 渲染日期
+    function renderDate() {
+        const now = new Date();
+        const s = now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0');
+        document.getElementById('main-date').innerText = s;
+    }
+    renderDate();
+
+    // Focus Timer（示例倒计时功能）
+    let timerSec = 0; // 25分钟
+    let timerRunning = true;
+    let intervalId = null;
+
+    function pad(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const ss = s % 60;
+        return pad(m) + ':' + pad(ss);
+    }
+
+    function updateTimer() {
+        const min = Math.floor(timerSec / 60);
+        const sec = timerSec % 60;
+        document.getElementById('focus-countdown').innerText =
+            pad(min) + ':' + pad(sec);
+    }
+
+    function initTimer() {
+        updateTimer();
+        if (intervalId === null) {
+            intervalId = setInterval(() => {
+                console.log(timerRunning)
+                if (timerRunning) {
+                    timerSec++;
+                    updateTimer();
+                }
+            }, 1000);
+        }
+    }
+
+    function restartTimer() {
+        timerSec = 0;
+        timerRunning = true;
+        updateTimer();
+    }
+
+    function setFocusTimer(task) {
+        restartTimer();
+
+        // “暂停/继续” 按钮
+        const endBtn = document.getElementById('end-btn');
+        endBtn.innerText = '暂停';
+        endBtn.onclick = () => {
+            timerRunning = !timerRunning;
+            endBtn.innerText = timerRunning ? '暂停' : '继续';
+        };
+
+        // “停止” 按钮
+        document.getElementById('stop-btn').onclick = () => {
+            if (task) {
+                updateResource(
+                    '/api/tasks', task.id,
+                    {actual_time_minutes: task.actual_time_minutes + Math.floor(timerSec / 60)}
+                );
+            }
+            setFocusTimer(null);  // 切到休息
+        };
+
+        if (task === null) {
+            document.getElementById('focus-title').innerText = "休息中";
+            document.getElementById('focus-energy').innerText = "";
+            document.getElementById('focus-bandwidth').innerText = "";
+        } else {
+            document.getElementById('focus-title').innerText = task.name;
+            document.getElementById('focus-energy').innerText = 'Energy: ' + task.energy_level_estimate;
+            document.getElementById('focus-bandwidth').innerText = 'Bandwidth: ' + task.tags;
+        }
+    }
+
+    function renderTasksList(tasks) {
+        const tbody = document.getElementById('task-list');
+        tbody.innerHTML = '';
+
+        tasks.forEach(task => {
+            // 计算 “起止时间” 显示
+            let timeRange = '--';
+            if (task.start_date && task.end_date) {
+                const start = new Date(task.start_date);
+                const end = new Date(task.end_date);
+                const fmt = d => `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
+                timeRange = `${fmt(start)} - ${fmt(end)}`;
+            }
+            const estimated = task.estimated_time_minutes + ` (${task.actual_time_minutes})`;
+            let goalName = task.short_term_goal_name || task.long_term_goal_name || '--';
+            goalName = goalName.split(' (')[0];
+
+            const tagsHtml = task.tags
+                ? task.tags.split(',').map(t => `<tag>${t.trim()}</tag>`).join(' ')
+                : '--';
+
+
+            // 优先级着色
+            let prioClass = '';
+            if (task.priority === 5) prioClass = 'priority-urgent';
+            else if (task.priority > 2) prioClass = 'priority-important';
+
+            // 精力着色
+            let energyClass = '';
+            if (task.energy_level_estimate === '高') energyClass = 'energy-high';
+            else if (task.energy_level_estimate === '中') energyClass = 'energy-medium';
+            else energyClass = 'energy-low';
+
+            // 每行 HTML
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${task.name}</td>
+                <td class="${prioClass}">${task.priority}</td>
+                <td>${timeRange}</td>
+                <td>${estimated} min</td>
+                <td>${tagsHtml}</td>
+                <td class="${energyClass}">${task.energy_level_estimate || '--'}</td>
+                <td>${goalName}</td>
+                <td><button class="add-btn" data-task-id="${task.id}">添加</button></td>
+              `;
+            tbody.appendChild(tr);
+        });
+
+        // —— 给所有“添加”按钮挂点击事件
+        tbody.querySelectorAll('.add-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = Number(btn.dataset.taskId);
+                const entry = await addTodayTask(id);
+            });
+        });
+
+    }
+
+    function renderTodayTasksList(todayTasks) {
+        const tbody = document.getElementById('job-list');
+        tbody.innerHTML = '';
+        todayTasksList = {};
+
+        todayTasks.forEach(t => {
+            let task = t.task_details;
+            todayTasksList[task.id] = task;
+            // 优先级着色
+            let prioClass = '';
+            if (task.priority === 5) prioClass = 'priority-urgent';
+            else if (task.priority > 2) prioClass = 'priority-important';
+
+            // 精力着色
+            let energyClass = '';
+            if (task.energy_level_estimate === '高') energyClass = 'energy-high';
+            else if (task.energy_level_estimate === '中') energyClass = 'energy-medium';
+            else energyClass = 'energy-low';
+
+            // 标签渲染
+            const tagsHtml = task.tags
+                ? task.tags.split(',').map(t => `<tag>${t.trim()}</tag>`).join(' ')
+                : '--';
+
+            // 来源：优先短期目标，否则长期目标
+            let source = task.short_term_goal_name || task.long_term_goal_name || '--';
+            // 去掉括号及内部
+            source = source.split(' (')[0];
+
+            // 预估耗时
+            const est = task.estimated_time_minutes != null
+                ? `${task.estimated_time_minutes}min`
+                : '--';
+
+            // 组装行
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${task.name}</td>
+              <td class="${prioClass}">${task.priority}</td>
+              <td>${est}</td>
+              <td class="${energyClass}">${task.energy_level_estimate || '--'}</td>
+              <td>${tagsHtml}</td>
+              <td>${source}</td>
+              <td><button class="start-btn" data-id="${task.id}">开始</button> <button class="remove-btn" data-id="${t.id}">移除</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                const csrftoken = getCookie('csrftoken');
+                try {
+                    // 调用后端删除接口（假设 DELETE /api/today_tasks/{id}/）
+                    const res = await fetch(`/api/today_tasks/${id}/`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    // 删除成功后，从页面上移除这行
+                    btn.closest('tr').remove();
+                } catch (err) {
+                    console.error('移除今日任务失败：', err);
+                }
+            });
+        });
+
+        tbody.querySelectorAll('.start-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('stop-btn').click();
+                const id = btn.dataset.id;
+                setFocusTimer(todayTasksList[id]);
+            });
+        });
+
+    }
+
+    async function addTodayTask(taskId, date) {
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const today = new Date().toISOString().slice(0, 10);
+            const payload = {task: taskId, date: today};
+            if (date) payload.date = date;  // 如果你的 TodayTaskSerializer 接受 date 字段
+
+            const res = await fetch('/api/today_tasks/', {
+                method: 'POST',
+                credentials: 'include',               // 如果使用 SessionAuthentication
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                throw new Error(`HTTP ${res.status} ${errData ? JSON.stringify(errData) : ''}`);
+            }
+
+            const newEntry = await res.json();
+            console.log('添加今日任务成功：', newEntry);
+
+            await fetchTodayTasks();
+
+            return newEntry;
+        } catch (err) {
+            console.error('添加今日任务失败：', err);
+            // 你可以在页面上弹个提示
+            // alert('添加失败：' + err.message);
+        }
+    }
+
+    async function fetchTasks() {
+        try {
+            const res = await fetch('/api/tasks/', {
+                credentials: 'include',   // 如果你用的是 SessionAuthentication
+                headers: {'Accept': 'application/json'}
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            renderTasksList(data);
+        } catch (err) {
+            console.error('拉取 tasks 失败：', err);
+        }
+    }
+
+    async function fetchTodayTasks() {
+        try {
+            const res = await fetch('/api/today_tasks/', {
+                credentials: 'include',   // 如果你用的是 SessionAuthentication
+                headers: {'Accept': 'application/json'}
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            renderTodayTasksList(data);
+        } catch (err) {
+            console.error('拉取 today_tasks 失败：', err);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchTasks();
+        fetchTodayTasks();
+
+        initTimer();
+        setFocusTimer(null);
+    });
+
+    async function updateResource(baseUrl, id, updates, method = 'PATCH') {
+        // 从 Cookie 中读取 CSRF token（Django 默认名为 csrftoken）
+        function getCookie(name) {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            for (let c of cookies) {
+                const [key, val] = c.split('=');
+                if (key === name) return decodeURIComponent(val);
+            }
+            return null;
+        }
+
+        const url = `${baseUrl}/${id}/`;
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const res = await fetch(url, {
+                method,
+                credentials: 'include',    // 带上 Session Cookie
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(updates),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                console.error(`更新资源 ${url} 失败：`, data);
+                return null;
+            }
+            console.log(`更新资源 ${url} 成功：`, data);
+            return data;
+
+        } catch (err) {
+            console.error(`网络或解析错误 (${method} ${url})：`, err);
+            return null;
+        }
+    }
+
+
+    function getCookie(name) {
+        let val = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(cookie => {
+                const [k, v] = cookie.trim().split('=');
+                if (k === name) val = decodeURIComponent(v);
+            });
+        }
+        return val;
+    }
+</script>
+</body>
+</html>
