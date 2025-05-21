@@ -302,6 +302,7 @@
     let timerSec = 0; // 25分钟
     let timerRunning = true;
     let intervalId = null;
+    let startTime = null;
 
     function pad(n) {
         return String(n).padStart(2, '0');
@@ -324,9 +325,8 @@
         updateTimer();
         if (intervalId === null) {
             intervalId = setInterval(() => {
-                console.log(timerRunning)
                 if (timerRunning) {
-                    timerSec++;
+                    timerSec = Math.floor(((new Date()).getTime() - startTime) / 1000);
                     updateTimer();
                 }
             }, 1000);
@@ -340,6 +340,7 @@
     }
 
     function setFocusTimer(task) {
+        startTime = (new Date()).getTime();
         restartTimer();
 
         // “暂停/继续” 按钮
@@ -352,10 +353,10 @@
 
         // “停止” 按钮
         document.getElementById('stop-btn').onclick = () => {
-            if (task) {
+            if (currentTask) {
                 updateResource(
-                    '/api/tasks', task.id,
-                    {actual_time_minutes: task.actual_time_minutes + Math.floor(timerSec / 60)}
+                    '/api/tasks', currentTask.id,
+                    {actual_time_minutes: currentTask.actual_time_minutes + Math.floor(timerSec / 60)}
                 );
             }
             setFocusTimer(null);  // 切到休息
@@ -365,10 +366,12 @@
             document.getElementById('focus-title').innerText = "休息中";
             document.getElementById('focus-energy').innerText = "";
             document.getElementById('focus-bandwidth').innerText = "";
+            currentTask = null;
         } else {
             document.getElementById('focus-title').innerText = task.name;
             document.getElementById('focus-energy').innerText = 'Energy: ' + task.energy_level_estimate;
             document.getElementById('focus-bandwidth').innerText = 'Bandwidth: ' + task.tags;
+            currentTask = task;
         }
     }
 
@@ -434,6 +437,7 @@
         const tbody = document.getElementById('job-list');
         tbody.innerHTML = '';
         todayTasksList = {};
+        let currentTask = null;
 
         todayTasks.forEach(t => {
             let task = t.task_details;
