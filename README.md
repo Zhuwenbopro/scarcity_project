@@ -10,6 +10,7 @@ python manage.py migrate
 ```
 # TODO List
 - [ ] 修改 Tasks 的状态
+- [ ] 每天早上做状态统计
 - [ ] 精力统计
 - [ ] 工作日志
 - [ ] Tasks 添加

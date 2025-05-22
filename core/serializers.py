@@ -3,8 +3,11 @@ from .models import (
     BandwidthTagCost, FixedSchedule, TodayTask,
     LongTermGoal, ShortTermGoal, Task, EnergyLog
 )
+
+
 class LongTermGoalSerializer(serializers.ModelSerializer):
     username = serializers.StringRelatedField(source='user', read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = LongTermGoal
@@ -14,6 +17,7 @@ class LongTermGoalSerializer(serializers.ModelSerializer):
 
 class ShortTermGoalSerializer(serializers.ModelSerializer):
     username = serializers.StringRelatedField(source='user', read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = ShortTermGoal
@@ -34,6 +38,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class EnergyLogSerializer(serializers.ModelSerializer):
     username = serializers.StringRelatedField(source='user', read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = EnergyLog

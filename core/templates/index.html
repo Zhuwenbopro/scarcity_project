@@ -211,65 +211,162 @@
             }
         }
     </style>
+    <style>
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            background: rgba(0, 0, 0, .08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: #fff;
+            padding: 28px 36px 20px 36px;
+            border-radius: 16px;
+            min-width: 310px;
+            box-shadow: 0 6px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .modal-card label {
+            display: block;
+            margin: 14px 0 3px 0;
+            font-size: 0.99em;
+            color: #383838;
+        }
+
+        .modal-card input, .modal-card textarea, .modal-card select {
+            width: 100%;
+            border: 1px solid #ececec;
+            border-radius: 8px;
+            padding: 7px 8px;
+            font-size: 1em;
+            background: #fafbfc;
+            margin-bottom: 7px;
+        }
+
+        .modal-card textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .modal-card .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-card .form-row > * {
+            flex: 1;
+        }
+
+        .modal-card .actions {
+            text-align: right;
+            margin-top: 13px;
+        }
+
+        .modal-card button {
+            font-size: 0.99em;
+            padding: 5px 19px;
+            border: none;
+            border-radius: 8px;
+            background: #efefef;
+            margin-left: 6px;
+            cursor: pointer;
+        }
+
+        .modal-card button.primary {
+            background: #111;
+            color: #fff;
+        }
+    </style>
+
 </head>
 <body>
 <div class="container">
     <!-- 侧边栏 -->
     <nav class="sidebar">
-        <ul>
-            <li class="active">Today's Tasks</li>
-            <li>Goal Management</li>
-            <li>Task List</li>
-            <li>Work Log</li>
-            <li>Energy Log</li>
-            <li>Settings</li>
+        <ul id="menu-list">
+            <li data-page="today" class="active">Today's Tasks</li>
+            <li data-page="long_term_goal">长期目标</li>
+            <li data-page="short_term_goal">短期目标</li>
+            <li data-page="task">任务清单</li>
+            <li data-page="work_log">Work Log</li>
+            <li data-page="energy_log">Energy Log</li>
+            <li data-page="settings">Settings</li>
         </ul>
     </nav>
+    <main class="main">
+        <!-- 今日任务页面 -->
+        <div id="page-today" class="main-page"></div>
+        <!-- 长期目标页面 -->
+        <div id="page-long_term_goal" class="main-page" style="display:none"></div>
+        <!-- 短期目标页面 -->
+        <div id="page-short_term_goal" class="main-page" style="display:none"></div>
+        <!-- 任务清单页面 -->
+        <div id="page-task" class="main-page" style="display:none"></div>
+        <!-- 其它页面... -->
+    </main>
 
     <!-- 主内容区 -->
     <main class="main">
-        <div class="headline" id="main-date"></div>
-        <div style="margin-bottom:10px;color:#757575;font-size:1em;">可用工作时常</div>
-        <div class="subtle-bar" style="width:220px;"></div>
-        <div style="margin-top:12px; margin-bottom:8px; color:#757575; font-size:1em;">Energy</div>
-        <div class="subtle-bar" style="width:140px;"></div>
+        <!-- 今日任务页面 -->
+        <div id="page-today" class="main-page">
+            <div class="headline" id="main-date"></div>
+            <div style="margin-bottom:10px;color:#757575;font-size:1em;">可用工作时常</div>
+            <div class="subtle-bar" style="width:220px;"></div>
+            <div style="margin-top:12px; margin-bottom:8px; color:#757575; font-size:1em;">Energy</div>
+            <div class="subtle-bar" style="width:140px;"></div>
 
-        <div class="section-title">Today's To-Do List</div>
-        <table>
-            <thead>
-            <tr>
-                <th>任务</th>
-                <th>优先级</th>
-                <th>预估耗时</th>
-                <th>能耗</th>
-                <th>标签</th>
-                <th>来源</th>
-                <th>操作</th>
-            </tr>
-            </thead>
-            <tbody id="job-list">
-            <!-- JS填充 -->
-            </tbody>
-        </table>
-        <hr/>
-        <div class="section-title">Tasks List</div>
-        <table>
-            <thead>
-            <tr>
-                <th>任务</th>
-                <th>优先级</th>
-                <th>起止时间</th>
-                <th>预估（已用）</th>
-                <th>标签</th>
-                <th>能耗</th>
-                <th>目标</th>
-                <th>操作</th>
-            </tr>
-            </thead>
-            <tbody id="task-list">
-            <!-- JS填充 -->
-            </tbody>
-        </table>
+            <div class="section-title">Today's To-Do List</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>任务</th>
+                    <th>优先级</th>
+                    <th>预估耗时</th>
+                    <th>能耗</th>
+                    <th>标签</th>
+                    <th>来源</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="job-list">
+                <!-- JS填充 -->
+                </tbody>
+            </table>
+            <hr/>
+            <div class="section-title">Tasks List</div>
+            <table>
+                <thead>
+                <tr>
+                    <th>任务</th>
+                    <th>优先级</th>
+                    <th>起止时间</th>
+                    <th>预估（已用）</th>
+                    <th>标签</th>
+                    <th>能耗</th>
+                    <th>目标</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="task-list">
+                <!-- JS填充 -->
+                </tbody>
+            </table>
+        </div>
+        <!-- 长期目标页面 -->
+        <div id="page-long_term_goal" class="main-page" style="display:none"></div>
+        <!-- 短期目标页面 -->
+        <div id="page-short_term_goal" class="main-page" style="display:none"></div>
+        <!-- 任务清单页面 -->
+        <div id="page-task" class="main-page" style="display:none"></div>
+        <!-- 其它页面... -->
+
         <!-- Focus Timer 浮动卡片 -->
         <div class="focus-timer" id="focus-timer">
             <div class="title" id="focus-title"></div>
@@ -277,7 +374,6 @@
             <div class="meta" id="focus-energy"></div>
             <div class="meta" id="focus-bandwidth"></div>
             <div class="btn-group">
-                <button id="end-btn" class="">开始</button>
                 <button id="stop-btn" class="primary">结束</button>
             </div>
         </div>
@@ -285,6 +381,354 @@
 </div>
 
 <script>
+    function getCookie(name) {
+        let val = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(cookie => {
+                const [k, v] = cookie.trim().split('=');
+                if (k === name) val = decodeURIComponent(v);
+            });
+        }
+        return val;
+    }
+
+    async function apiFetch(url, {method = 'GET', headers = {}, body = null} = {}) {
+        let opts = {method, credentials: 'include', headers: {...headers}};
+        if (body && typeof body === 'object' && !(body instanceof FormData)) {
+            body = JSON.stringify(body);
+            opts.headers['Content-Type'] = 'application/json';
+        }
+        if (method !== 'GET') {
+            opts.headers['X-CSRFToken'] = getCookie('csrftoken');
+        }
+        if (body) opts.body = body;
+        let res = await fetch(url, opts);
+        // 自动报错（你可以优化为错误提示UI）
+        if (!res.ok) {
+            let err = '';
+            try {
+                err = await res.json();
+            } catch {
+            }
+            throw err || new Error(`HTTP ${res.status}`);
+        }
+        // PATCH/DELETE有时返回空body，这里安全返回
+        let txt = await res.text();
+        try {
+            return txt ? JSON.parse(txt) : {};
+        } catch {
+            return {};
+        }
+    }
+
+    document.querySelectorAll('#menu-list li').forEach(li => {
+        li.addEventListener('click', function () {
+            document.querySelectorAll('#menu-list li').forEach(x => x.classList.remove('active'));
+            this.classList.add('active');
+            const page = this.dataset.page;
+            document.querySelectorAll('.main-page').forEach(div => div.style.display = 'none');
+            document.getElementById('page-' + page).style.display = '';
+            // 页面切换时自动刷新内容
+            if (page === 'long_term_goal') fetchAndRenderLongTermGoals();
+            else if (page === 'short_term_goal') fetchAndRenderShortTermGoals();
+            else if (page === 'task') fetchAndRenderTasks();
+            // ...其它页面同理
+        });
+    });
+
+    function showForm({type, data = null, onSave}) {
+        // 字段配置
+        let fields = [];
+        if (type === 'long') {
+            fields = [
+                {name: 'name', label: '长期目标描述', type: 'textarea'},
+                {name: 'status', label: '状态', type: 'select', options: ['持续追求', '已归档']}
+            ];
+        } else if (type === 'short') {
+            fields = [
+                {name: 'name', label: '短期目标描述', type: 'textarea'},
+                {
+                    name: 'priority',
+                    label: '优先级',
+                    type: 'select',
+                    options: ['重要且紧急', '重要不紧急', '紧急不重要', '不重要不紧急']
+                },
+                {
+                    name: 'status',
+                    label: '状态',
+                    type: 'select',
+                    options: ['未开始', '进行中', '已完成', '已推迟', '已放弃', '阻塞']
+                },
+                {name: 'target_date', label: '目标日期', type: 'date'},
+                {name: 'estimated_time_days', label: '预估天数', type: 'number'},
+            ];
+        } else if (type === 'task') {
+            fields = [
+                {name: 'name', label: '任务名称', type: 'text'},
+                {name: 'priority', label: '优先级(1-5, 1为最高)', type: 'number', min: 1, max: 5},
+                {name: 'energy_level_estimate', label: '精力预估', type: 'select', options: ['高', '中', '低']},
+                {name: 'tags', label: '标签（逗号分隔）', type: 'text'},
+                {name: 'estimated_time_minutes', label: '预估耗时(分钟)', type: 'number'},
+                {name: 'start_date', label: '开始日期', type: 'date'},
+                {name: 'end_date', label: '截止日期', type: 'date'},
+                {
+                    name: 'short_term_goal_ref',
+                    label: '关联短期目标',
+                    type: 'select',
+                    options: window.shortTermGoalOptions || []
+                },
+                {
+                    name: 'long_term_goal_ref',
+                    label: '关联长期目标',
+                    type: 'select',
+                    options: window.longTermGoalOptions || []
+                },
+            ];
+        }
+        // HTML生成
+        let html = `<div class="modal-mask"><div class="modal-card"><div style="font-size:1.08em;margin-bottom:10px;">${data ? '编辑' : '新建'}${type === 'long' ? '长期目标' : type === 'short' ? '短期目标' : '任务'}</div>
+        <form id="goal-form">${fields.map(f => {
+            if (f.type === 'textarea') return `<label>${f.label}<textarea name="${f.name}" required></textarea></label>`;
+            if (f.type === 'select') {
+                let opts = (Array.isArray(f.options) ? f.options : []).map(opt => {
+                    let v = typeof opt === 'object' ? opt.value : opt;
+                    let txt = typeof opt === 'object' ? opt.label : opt;
+                    return `<option value="${v}">${txt}</option>`;
+                }).join('');
+                return `<label>${f.label}<select name="${f.name}" ${f.options.length ? '' : 'disabled'}>${opts}</select></label>`;
+            }
+            return `<label>${f.label}<input name="${f.name}" type="${f.type}" ${f.min ? `min="${f.min}"` : ''} ${f.max ? `max="${f.max}"` : ''}></label>`;
+        }).join('')}</form>
+        <div class="actions">
+            <button id="goal-cancel">取消</button>
+            <button id="goal-ok" class="primary">保存</button>
+        </div>
+    </div></div>`;
+        let modal = document.createElement('div');
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+
+        // 填充默认值
+        if (data) {
+            let form = modal.querySelector('form');
+            Object.keys(data).forEach(k => {
+                if (form[k] !== undefined && data[k] != null) form[k].value = data[k];
+            });
+        }
+
+        // 取消
+        modal.querySelector('#goal-cancel').onclick = () => document.body.removeChild(modal);
+        // 保存
+        modal.querySelector('#goal-ok').onclick = () => {
+            let form = modal.querySelector('form');
+            let fd = new FormData(form);
+            let obj = {};
+            for (let [k, v] of fd.entries()) obj[k] = v;
+            // 数字字段自动转型
+            ['priority', 'estimated_time_days', 'estimated_time_minutes'].forEach(f => {
+                if (obj[f] !== undefined && obj[f] !== '') obj[f] = Number(obj[f]);
+            });
+            // 空字符串转null
+            Object.keys(obj).forEach(k => {
+                if (obj[k] === '') obj[k] = null;
+            });
+            onSave(obj);
+            document.body.removeChild(modal);
+        };
+    }
+
+    async function refreshGoalOptions() {
+        // 用于任务表单的下拉选择
+        let short = await fetch('/api/short_term_goals/', {credentials: 'include'}).then(r => r.json());
+        let long = await fetch('/api/long_term_goals/', {credentials: 'include'}).then(r => r.json());
+        window.shortTermGoalOptions = [{label: '--无--', value: ''}, ...short.map(x => ({label: x.name, value: x.id}))];
+        window.longTermGoalOptions = [{label: '--无--', value: ''}, ...long.map(x => ({label: x.name, value: x.id}))];
+    }
+
+    async function fetchAndRenderLongTermGoals() {
+        let dom = document.getElementById('page-long_term_goal');
+        let data = await apiFetch('/api/long_term_goals/');
+        dom.innerHTML = `
+        <div class="section-title" style="margin-top:0;">长期目标清单 <button id="add-long-goal-btn" style="margin-left:12px;">+ 新建</button></div>
+        <table><thead><tr><th>描述</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody>
+        ${data.map(goal => `
+          <tr>
+            <td>${goal.name}</td>
+            <td>${goal.status}</td>
+            <td>${goal.created_at ? goal.created_at.substr(0, 10) : ''}</td>
+            <td>
+              <button class="edit-long-goal" data-id="${goal.id}">编辑</button>
+              <button class="del-long-goal" data-id="${goal.id}">删除</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody></table>
+    `;
+        dom.querySelector('#add-long-goal-btn').onclick = () => {
+            showForm({
+                type: 'long',
+                onSave: async ({name, status}) => {
+                    await apiFetch('/api/long_term_goals/', {method: 'POST', body: {name, status}});
+                    fetchAndRenderLongTermGoals();
+                }
+            });
+        };
+        dom.querySelectorAll('.edit-long-goal').forEach(btn => {
+            btn.onclick = () => {
+                let goal = data.find(x => x.id == btn.dataset.id);
+                showForm({
+                    type: 'long',
+                    data: goal,
+                    onSave: async ({name, status}) => {
+                        await apiFetch(`/api/long_term_goals/${goal.id}/`, {method: 'PATCH', body: {name, status}});
+                        fetchAndRenderLongTermGoals();
+                    }
+                });
+            };
+        });
+        dom.querySelectorAll('.del-long-goal').forEach(btn => {
+            btn.onclick = async () => {
+                if (confirm('确定删除？')) {
+                    await apiFetch(`/api/long_term_goals/${btn.dataset.id}/`, {method: 'DELETE'});
+                    fetchAndRenderLongTermGoals();
+                }
+            }
+        });
+    }
+
+    async function fetchAndRenderShortTermGoals() {
+        let dom = document.getElementById('page-short_term_goal');
+        let data = await apiFetch('/api/short_term_goals/');
+        dom.innerHTML = `
+        <div class="section-title" style="margin-top:0;">短期目标清单 <button id="add-short-goal-btn" style="margin-left:12px;">+ 新建</button></div>
+        <table><thead><tr><th>描述</th><th>优先级</th><th>状态</th><th>目标日期</th><th>预估天数</th><th>操作</th></tr></thead>
+        <tbody>
+        ${data.map(goal => `
+          <tr>
+            <td>${goal.name}</td>
+            <td>${goal.priority || ''}</td>
+            <td>${goal.status || ''}</td>
+            <td>${goal.target_date || ''}</td>
+            <td>${goal.estimated_time_days || ''}</td>
+            <td>
+              <button class="edit-short-goal" data-id="${goal.id}">编辑</button>
+              <button class="del-short-goal" data-id="${goal.id}">删除</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody></table>
+    `;
+        dom.querySelector('#add-short-goal-btn').onclick = () => {
+            showForm({
+                type: 'short',
+                onSave: async (obj) => {
+                    await apiFetch('/api/short_term_goals/', {method:'POST', body:JSON.stringify(obj)});
+                    fetchAndRenderShortTermGoals();
+                    await refreshGoalOptions(); // 刷新任务下拉
+                }
+            });
+        };
+        dom.querySelectorAll('.edit-short-goal').forEach(btn => {
+            btn.onclick = () => {
+                let goal = data.find(x => x.id == btn.dataset.id);
+                showForm({
+                    type: 'short',
+                    data: goal,
+                    onSave: async (obj) => {
+                        await apiFetch(`/api/short_term_goals/${goal.id}/`, {method:'PATCH', body:JSON.stringify(obj)});
+                        fetchAndRenderShortTermGoals();
+                        await refreshGoalOptions();
+                    }
+                });
+            };
+        });
+        dom.querySelectorAll('.del-short-goal').forEach(btn => {
+            btn.onclick = async () => {
+                if (confirm('确定删除？')) {
+                    await apiFetch(`/api/short_term_goals/${btn.dataset.id}/`, {method:'DELETE'});
+                    fetchAndRenderShortTermGoals();
+                    await refreshGoalOptions();
+                }
+            }
+        });
+    }
+
+    async function fetchAndRenderTasks() {
+        await refreshGoalOptions();
+        let dom = document.getElementById('page-task');
+        let data = await apiFetch('/api/tasks/');
+        dom.innerHTML = `
+        <div class="section-title" style="margin-top:0;">任务清单 <button id="add-task-btn" style="margin-left:12px;">+ 新建</button></div>
+        <table><thead><tr>
+          <th>名称</th><th>优先级</th><th>精力</th><th>标签</th>
+          <th>预估</th><th>开始</th><th>截止</th>
+          <th>短期目标</th><th>长期目标</th>
+          <th>操作</th>
+        </tr></thead>
+        <tbody>
+        ${data.map(task => `
+          <tr>
+            <td>${task.name}</td>
+            <td>${task.priority}</td>
+            <td>${task.energy_level_estimate || ''}</td>
+            <td>${task.tags || ''}</td>
+            <td>${task.estimated_time_minutes || ''}</td>
+            <td>${task.start_date || ''}</td>
+            <td>${task.end_date || ''}</td>
+            <td>${task.short_term_goal_ref ? (task.short_term_goal_name || task.short_term_goal_ref) : ''}</td>
+            <td>${task.long_term_goal_ref ? (task.long_term_goal_name || task.long_term_goal_ref) : ''}</td>
+            <td>
+              <button class="edit-task" data-id="${task.id}">编辑</button>
+              <button class="del-task" data-id="${task.id}">删除</button>
+            </td>
+          </tr>
+        `).join('')}
+        </tbody></table>
+    `;
+        dom.querySelector('#add-task-btn').onclick = () => {
+            showForm({
+                type: 'task',
+                onSave: async (obj) => {
+                    // 转为int id
+                    if (obj.short_term_goal_ref) obj.short_term_goal_ref = Number(obj.short_term_goal_ref) || null;
+                    if (obj.long_term_goal_ref) obj.long_term_goal_ref = Number(obj.long_term_goal_ref) || null;
+                    await apiFetch('/api/tasks/', {method:'POST', body:JSON.stringify(obj)});
+                    fetchAndRenderTasks();
+                }
+            });
+        };
+        dom.querySelectorAll('.edit-task').forEach(btn => {
+            btn.onclick = () => {
+                let task = data.find(x => x.id == btn.dataset.id);
+                showForm({
+                    type: 'task',
+                    data: task,
+                    onSave: async (obj) => {
+                        if (obj.short_term_goal_ref) obj.short_term_goal_ref = Number(obj.short_term_goal_ref) || null;
+                        if (obj.long_term_goal_ref) obj.long_term_goal_ref = Number(obj.long_term_goal_ref) || null;
+                        await apiFetch(`/api/tasks/${task.id}/`, {method:'PATCH', body:JSON.stringify(obj)});
+                        fetchAndRenderTasks();
+                    }
+                });
+            };
+        });
+        dom.querySelectorAll('.del-task').forEach(btn => {
+            btn.onclick = async () => {
+                if (confirm('确定删除？')) {
+                    await apiFetch(`/api/tasks/${btn.dataset.id}/`, {method:'DELETE'});
+                    fetchAndRenderTasks();
+                }
+            }
+        });
+    }
+
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        await refreshGoalOptions();
+        // 你原本的 fetchTodayTasks 等不变
+    });
+
     // 示例数据
     let todayTasksList = {};
 
@@ -296,13 +740,14 @@
             String(now.getDate()).padStart(2, '0');
         document.getElementById('main-date').innerText = s;
     }
+
     renderDate();
 
     // Focus Timer（示例倒计时功能）
     let timerSec = 0; // 25分钟
-    let timerRunning = true;
     let intervalId = null;
     let startTime = null;
+    let currentTask = null;
 
     function pad(n) {
         return String(n).padStart(2, '0');
@@ -325,31 +770,22 @@
         updateTimer();
         if (intervalId === null) {
             intervalId = setInterval(() => {
-                if (timerRunning) {
-                    timerSec = Math.floor(((new Date()).getTime() - startTime) / 1000);
-                    updateTimer();
-                }
+                timerSec = Math.floor(((new Date()).getTime() - startTime) / 1000);
+                updateTimer();
             }, 1000);
         }
     }
 
     function restartTimer() {
         timerSec = 0;
-        timerRunning = true;
         updateTimer();
     }
 
     function setFocusTimer(task) {
         startTime = (new Date()).getTime();
+        currentTask = task;
         restartTimer();
 
-        // “暂停/继续” 按钮
-        const endBtn = document.getElementById('end-btn');
-        endBtn.innerText = '暂停';
-        endBtn.onclick = () => {
-            timerRunning = !timerRunning;
-            endBtn.innerText = timerRunning ? '暂停' : '继续';
-        };
 
         // “停止” 按钮
         document.getElementById('stop-btn').onclick = () => {
@@ -366,12 +802,10 @@
             document.getElementById('focus-title').innerText = "休息中";
             document.getElementById('focus-energy').innerText = "";
             document.getElementById('focus-bandwidth').innerText = "";
-            currentTask = null;
         } else {
             document.getElementById('focus-title').innerText = task.name;
             document.getElementById('focus-energy').innerText = 'Energy: ' + task.energy_level_estimate;
             document.getElementById('focus-bandwidth').innerText = 'Bandwidth: ' + task.tags;
-            currentTask = task;
         }
     }
 
@@ -437,7 +871,6 @@
         const tbody = document.getElementById('job-list');
         tbody.innerHTML = '';
         todayTasksList = {};
-        let currentTask = null;
 
         todayTasks.forEach(t => {
             let task = t.task_details;
@@ -624,18 +1057,6 @@
             console.error(`网络或解析错误 (${method} ${url})：`, err);
             return null;
         }
-    }
-
-
-    function getCookie(name) {
-        let val = null;
-        if (document.cookie) {
-            document.cookie.split(';').forEach(cookie => {
-                const [k, v] = cookie.trim().split('=');
-                if (k === name) val = decodeURIComponent(v);
-            });
-        }
-        return val;
     }
 </script>
 </body>
