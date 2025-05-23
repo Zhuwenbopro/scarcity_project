@@ -1,2 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+scarcity_project/settings.py
 db.sqlite3
-.idea
+staticfiles/
+media/
+myvenv/
+*.log
