@@ -189,6 +189,75 @@
             background: #ebebeb;
         }
 
+        .focus-timer {
+            /* ... existing styles ... */
+            cursor: grab; /* Indicate draggability */
+            user-select: none; /* Prevent text selection when dragging header */
+        }
+
+        .focus-timer.dragging {
+            cursor: grabbing;
+            opacity: 0.9; /* Optional: visual feedback during drag */
+        }
+
+        .focus-timer.fullscreen {
+            position: fixed !important; /* Override responsive static position */
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            z-index: 1000 !important; /* Ensure it's on top */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .focus-timer.fullscreen .title {
+            font-size: 2.5em; /* Larger title in fullscreen */
+            margin-bottom: 20px;
+        }
+
+        .focus-timer.fullscreen .timer {
+            font-size: 8em; /* Much larger timer in fullscreen */
+            margin-bottom: 30px;
+        }
+
+        .focus-timer.fullscreen .meta {
+            font-size: 1.5em; /* Larger meta in fullscreen */
+            margin-bottom: 15px;
+        }
+
+        .focus-timer.fullscreen .btn-group {
+            margin-top: 20px;
+            transform: scale(1.2); /* 暂时可以保留，但如果后续还有问题可以先注释掉它来测试 */
+            display: flex;
+            justify-content: center; /* 让按钮在按钮组内水平居中 */
+            align-items: center; /* 如果按钮高度不一致，让它们垂直居中 */
+            gap: 10px; /* 调整间距，因为按钮变大了 */
+            width: 100%; /* 让按钮组占据其父容器（focus-timer）的可用宽度 */
+            /* 或者 width: auto; 然后依赖于 focus-timer 的 align-items: center */
+            box-sizing: border-box; /* 如果设置了 padding 或 border 在 width: 100% 时需要 */
+            padding: 0 10px; /* 可选：给按钮组左右留点空隙，防止按钮贴边 */
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .focus-timer.fullscreen #fullscreen-btn {
+            display: inline-block !important; /* Or flex, button, etc. Use !important for debugging */
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Prevent dragging when clicking on buttons inside focus-timer */
+        .focus-timer button {
+            cursor: pointer; /* Override grab cursor */
+        }
+
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -473,6 +542,7 @@
             <div class="meta" id="focus-energy"></div>
             <div class="meta" id="focus-bandwidth"></div>
             <div class="btn-group">
+                <button id="fullscreen-btn" style="display:none;">全屏</button>
                 <button id="stop-btn" class="primary">结束</button>
             </div>
         </div>
@@ -487,6 +557,102 @@
 </div>
 
 <script>
+    // ... (near other global vars like timerSec, intervalId) ...
+    const focusTimerElement = document.getElementById('focus-timer');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    function makeDraggable() {
+        focusTimerElement.addEventListener('mousedown', (e) => {
+            // Only drag if mousedown is on the timer itself or its direct children like title/timer display,
+            // NOT on buttons within it.
+            if (e.target.closest('button')) {
+                return;
+            }
+            // Only allow dragging if not fullscreen and not on small screens where it's static
+            if (focusTimerElement.classList.contains('fullscreen') || getComputedStyle(focusTimerElement).position === 'static') {
+                return;
+            }
+
+            isDragging = true;
+            focusTimerElement.classList.add('dragging');
+            // Calculate offset from the element's current left/top
+            offsetX = e.clientX - focusTimerElement.offsetLeft;
+            offsetY = e.clientY - focusTimerElement.offsetTop;
+
+            // Ensure position is absolute for dragging to work after being static
+            if (getComputedStyle(focusTimerElement).position !== 'absolute' && getComputedStyle(focusTimerElement).position !== 'fixed') {
+                focusTimerElement.style.position = 'absolute';
+                // Recalculate offsets if position changed
+                offsetX = e.clientX - focusTimerElement.offsetLeft;
+                offsetY = e.clientY - focusTimerElement.offsetTop;
+            }
+            // Remove right/bottom if they are set, to rely on left/top
+            focusTimerElement.style.right = 'auto';
+            focusTimerElement.style.bottom = 'auto';
+
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            // Prevent default to avoid text selection, etc.
+            // e.preventDefault(); // Can be a bit aggressive, test if needed
+
+            let newX = e.clientX - offsetX;
+            let newY = e.clientY - offsetY;
+
+            // Basic boundary collision (optional, can be improved)
+            const mainRect = document.querySelector('.main').getBoundingClientRect();
+            const timerRect = focusTimerElement.getBoundingClientRect();
+
+            // Ensure it doesn't go too far left/top
+            // newX = Math.max(0, newX);
+            // newY = Math.max(0, newY);
+            // Ensure it doesn't go too far right/bottom (relative to main area)
+            // newX = Math.min(newX, mainRect.width - timerRect.width);
+            // newY = Math.min(newY, mainRect.height - timerRect.height);
+
+
+            focusTimerElement.style.left = `${newX}px`;
+            focusTimerElement.style.top = `${newY}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                focusTimerElement.classList.remove('dragging');
+            }
+        });
+    }
+
+    function toggleFullScreen() {
+        console.log("toggleFullScreen called. Current classes:", focusTimerElement.className);
+
+        focusTimerElement.classList.toggle('fullscreen');
+
+        if (focusTimerElement.classList.contains('fullscreen')) {
+            console.log("Entered fullscreen mode. Setting button text to '退出全屏'.");
+            fullscreenBtn.textContent = '退出全屏';
+            fullscreenBtn.style.display = ''; // Ensure it's visible
+            console.log("Button text should now be:", fullscreenBtn.textContent);
+
+        } else {
+            console.log("Exited fullscreen mode. Setting button text to '全屏'.");
+            fullscreenBtn.textContent = '全屏';
+            console.log("Button text should now be:", fullscreenBtn.textContent);
+
+            if (focusTimerElement.style.getPropertyValue('--was-static-before-fullscreen') === 'true') {
+                console.log("Restoring static positioning.");
+                focusTimerElement.style.left = '';
+                focusTimerElement.style.top = '';
+                focusTimerElement.style.position = '';
+                focusTimerElement.style.removeProperty('--was-static-before-fullscreen');
+            }
+        }
+        console.log("toggleFullScreen finished. New classes:", focusTimerElement.className);
+    }
+
     async function checkAuthenticated() {
         try {
             const response = await apiFetch('/api/long_term_goals/'); // apiFetch 现在返回 Response 对象
@@ -1015,26 +1181,46 @@
         currentTask = task;
         restartTimer();
 
-
-        // “停止” 按钮
         document.getElementById('stop-btn').onclick = () => {
-            if (currentTask) {
-                updateResource(
-                    '/api/tasks', currentTask.id,
-                    {actual_time_minutes: currentTask.actual_time_minutes + Math.floor(timerSec / 60)}
-                );
+            if (currentTask && timerSec > 0) { // Only log if active and time passed
+                const minutesElapsed = Math.floor(timerSec / 60);
+                if (minutesElapsed > 0) { // Only update if at least a minute passed
+                    updateResource(
+                        '/api/tasks', currentTask.id,
+                        {actual_time_minutes: (currentTask.actual_time_minutes || 0) + minutesElapsed}
+                    ).then(updatedTask => {
+                        if (updatedTask) {
+                            // Optionally refresh task list or update local data if needed
+                            console.log("Task time updated on server:", updatedTask);
+                            // Update local currentTask data to prevent double-counting if stop is hit again quickly
+                            currentTask.actual_time_minutes = updatedTask.actual_time_minutes;
+                        }
+                    });
+                }
             }
             setFocusTimer(null);  // 切到休息
         };
 
-        if (task === null) {
+        if (task === null) { // Resting state
             document.getElementById('focus-title').innerText = "休息中";
             document.getElementById('focus-energy').innerText = "";
             document.getElementById('focus-bandwidth').innerText = "";
-        } else {
+
+            console.log("Resting: Hiding fullscreenBtn and stop-btn");
+            fullscreenBtn.style.display = 'none'; // Hide fullscreen button
+            if (focusTimerElement.classList.contains('fullscreen')) {
+                toggleFullScreen(); // Exit fullscreen if resting
+            }
+            document.getElementById('stop-btn').style.display = 'none';
+
+        } else { // Active task
             document.getElementById('focus-title').innerText = task.name;
             document.getElementById('focus-energy').innerText = 'Energy: ' + task.energy_level_estimate;
             document.getElementById('focus-bandwidth').innerText = 'Bandwidth: ' + task.tags;
+
+            console.log("Task active: Showing fullscreenBtn and stop-btn");
+            fullscreenBtn.style.display = ''; // Show fullscreen button
+            document.getElementById('stop-btn').style.display = '';
         }
     }
 
@@ -1221,8 +1407,6 @@
         {#console.log("DOM fully loaded and parsed"); // 确认事件触发#}
         // 1. 检查登录
         const isAuthenticated = await checkAuthenticated();
-        {#console.log("Is authenticated:", isAuthenticated);#}
-
         if (!isAuthenticated) {
             showLoginModal(() => location.reload()); // 登录成功刷新页面
             return; // 未登录，不执行后续
@@ -1236,6 +1420,21 @@
         renderDate();
         initTimer();
         setFocusTimer(null);
+
+        makeDraggable();
+        fullscreenBtn.addEventListener('click', () => {
+            // If it's currently static (due to media query) and we are about to enter fullscreen
+            if (getComputedStyle(focusTimerElement).position === 'static' && !focusTimerElement.classList.contains('fullscreen')) {
+                // Mark it so we can revert properly upon exiting fullscreen
+                focusTimerElement.style.setProperty('--was-static-before-fullscreen', 'true');
+            }
+            toggleFullScreen(); // This function handles both entering and exiting
+        });
+
+        // Ensure stop button is initially hidden if timer starts in rest mode
+        if (currentTask === null) {
+            document.getElementById('stop-btn').style.display = 'none';
+        }
     });
 
 
