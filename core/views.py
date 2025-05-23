@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status, permissions
+from rest_framework.response import Response
 from .models import (
     LongTermGoal, ShortTermGoal, Task, EnergyLog,
     BandwidthTagCost, FixedSchedule, UserSetting, TodayTask
@@ -42,7 +43,20 @@ class ShortTermGoalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        print("====== ShortTermGoalViewSet: create ======")  # 添加一个标记，方便定位
+        print("Request Method:", request.method)
+        print("Request Headers:", request.headers)  # 可以看看 Content-Type
+        print("Request data RECEIVED:", request.data)  # <--- 关键输出1
 
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            print("Serializer ERRORS:", serializer.errors)  # <--- 关键输出2
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]

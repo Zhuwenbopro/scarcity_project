@@ -753,7 +753,7 @@
             let obj = {};
             for (let [k, v] of fd.entries()) obj[k] = v;
             // 数字字段自动转型
-            ['priority', 'estimated_time_days', 'estimated_time_minutes'].forEach(f => {
+            ['estimated_time_days', 'estimated_time_minutes'].forEach(f => {
                 if (obj[f] !== undefined && obj[f] !== '') obj[f] = Number(obj[f]);
             });
             // 空字符串转null
@@ -853,7 +853,7 @@
             showForm({
                 type: 'short',
                 onSave: async (obj) => {
-                    await apiFetch('/api/short_term_goals/', {method: 'POST', body: JSON.stringify(obj)});
+                    await apiFetch('/api/short_term_goals/', {method: 'POST', body: obj, bodyType: 'json'});
                     fetchAndRenderShortTermGoals();
                     await refreshGoalOptions(); // 刷新任务下拉
                 }
@@ -868,7 +868,8 @@
                     onSave: async (obj) => {
                         await apiFetch(`/api/short_term_goals/${goal.id}/`, {
                             method: 'PATCH',
-                            body: JSON.stringify(obj)
+                            body: obj,
+                            bodyType: 'json'
                         });
                         fetchAndRenderShortTermGoals();
                         await refreshGoalOptions();
@@ -927,7 +928,7 @@
                     // 转为int id
                     if (obj.short_term_goal_ref) obj.short_term_goal_ref = Number(obj.short_term_goal_ref) || null;
                     if (obj.long_term_goal_ref) obj.long_term_goal_ref = Number(obj.long_term_goal_ref) || null;
-                    await apiFetch('/api/tasks/', {method: 'POST', body: JSON.stringify(obj)});
+                    await apiFetch('/api/tasks/', {method: 'POST', body: obj, bodyType: 'json'});
                     fetchAndRenderTasks();
                 }
             });
@@ -941,7 +942,7 @@
                     onSave: async (obj) => {
                         if (obj.short_term_goal_ref) obj.short_term_goal_ref = Number(obj.short_term_goal_ref) || null;
                         if (obj.long_term_goal_ref) obj.long_term_goal_ref = Number(obj.long_term_goal_ref) || null;
-                        await apiFetch(`/api/tasks/${task.id}/`, {method: 'PATCH', body: JSON.stringify(obj)});
+                        await apiFetch(`/api/tasks/${task.id}/`, {method: 'PATCH', body: obj, bodyType: 'json'});
                         fetchAndRenderTasks();
                     }
                 });
@@ -1174,7 +1175,7 @@
             const payload = {task: taskId, date: today};
             if (date) payload.date = date;  // 如果你的 TodayTaskSerializer 接受 date 字段
 
-            const res = await apiFetch('/api/today_tasks/', {method: 'POST', body: JSON.stringify(payload)});
+            const res = await apiFetch('/api/today_tasks/', {method: 'POST', body: payload, bodyType: 'json'});
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => null);
@@ -1251,7 +1252,7 @@
         const url = `${baseUrl}/${id}/`;
 
         try {
-            const res = await apiFetch(url, {method: method, body: JSON.stringify(updates)});
+            const res = await apiFetch(url, {method: method, body: updates, bodyType: 'json'});
             const data = await res.json();
             if (!res.ok) {
                 console.error(`更新资源 ${url} 失败：`, data);
