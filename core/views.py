@@ -8,7 +8,12 @@ from .serializers import (
     LongTermGoalSerializer, ShortTermGoalSerializer, TaskSerializer, TodayTaskSerializer,
     EnergyLogSerializer, BandwidthTagCostSerializer, FixedScheduleSerializer
 )
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
+def get_csrf_token(request):
+    token = get_token(request)
+    return JsonResponse({'csrfToken': token})
 
 def home(request):
     return render(request, 'index.html')

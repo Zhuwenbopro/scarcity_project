@@ -9,12 +9,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 # TODO List
-- [ ] 修改 Tasks 的状态
+- [x] 修改 Tasks 的状态
 - [ ] 每天早上做状态统计
 - [ ] 精力统计
 - [ ] 工作日志
-- [ ] Tasks 添加
-- [ ] Long Term Goals、Short Term Goals 添加
+- [x] 用户登录
+- [x] Tasks 添加
+- [x] Long Term Goals、Short Term Goals 添加
 - [ ] 决策建议
 - [ ] 休息提醒
 - [ ] 架构设计文档
